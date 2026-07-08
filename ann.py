@@ -79,14 +79,13 @@ def preprocess_image(img):
     feature = img_edges.flatten() / 255.0 # flattering: 28*28 boyutundan 784 boyutuna cevirme
     return feature
 
-num_train =10000
-num_test = 2000
+# 60.000 eğitim verisinin tamamını ön işlemeden geçiriyoruz
+x_train_sub = np.array([preprocess_image(img) for img in x_train])
+y_train_sub = y_train  # Kesme işlemi yapmadan tamamını aldık
 
-x_train = np.array([preprocess_image(img) for img in x_train[ :num_train]])
-y_train_sub = y_train[ :num_train]
-
-x_test = np.array([preprocess_image(img) for img in x_test[ :num_test]])
-y_test_sub = y_test[ :num_test]
+# 10.000 test verisinin tamamını ön işlemeden geçiriyoruz
+x_test_sub = np.array([preprocess_image(img) for img in x_test])
+y_test_sub = y_test  # Kesme işlemi yapmadan tamamını aldık
 
 # ann model creation
 model = Sequential([
@@ -107,11 +106,34 @@ print(model.summary())
 
 # ann model training
 history = model.fit(
-    x_train, y_train_sub,
-    validation_data = (x_test, y_test_sub),
-    epochs = 10, #epoch sayisi
-    batch_size = 32, # batch boyutu
+    x_train_sub, y_train_sub,  # 🌟 Ön işlemeden geçen tüm x_train verisini verdik
+    validation_data = (x_test_sub, y_test_sub),  # 🌟 Ön işlemeden geçen tüm x_test verisini verdik
+    epochs = 50, # epoch sayisi
+    batch_size = 128, # batch boyutu
     verbose = 2
 )
 
 # evaluate model performance
+test_loss, test_acc = model.evaluate(x_test_sub, y_test_sub)
+print(f"Test loss: {test_loss:.4f}, Test accuracy: {test_acc:.4f}")
+
+# plot training history
+plt.figure(figsize = (12,5))
+plt.subplot(1,2,1)
+plt.plot(history.history["loss"], label = "Training Loss")
+plt.plot(history.history["val_loss"], label = "Validation Loss")
+plt.title("Loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+
+plt.subplot(1,2,2)
+plt.plot(history.history["accuracy"], label = "Training Accuracy")
+plt.plot(history.history["val_accuracy"], label = "Validation Accuracy")
+plt.title("Accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+
+plt.tight_layout()
+plt.show()
