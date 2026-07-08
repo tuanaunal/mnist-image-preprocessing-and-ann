@@ -1,36 +1,38 @@
-# MNIST ile Görüntü Ön İşleme ve Yapay Sinir Ağları (ANN) Projesi
+# MNIST Digit Classification with Artificial Neural Networks (ANN)
 
-Bu proje, derin öğrenme dünyasının klasik başlangıç taşı olan **MNIST el yazısı rakam veri setini** kullanarak, ham görüntülerin yapay sinir ağlarına verilmeden önce hangi ön işleme aşamalarından geçtiğini ve bir Yapay Sinir Ağı (ANN) modelinin nasıl inşa edilip eğitildiğini adım adım uygulamalı olarak göstermektedir.
+This project implements a handwritten digit recognition system using an Artificial Neural Network (ANN) on the classic MNIST dataset. Images are preprocessed using computer vision techniques to enhance feature extraction before feeding them into the network.
 
----
+## Image Preprocessing Pipeline
 
-## Proje İçeriği ve Yol Haritası
+Before training, each 28x28 grayscale image passes through the following stages:
 
-- **Görüntü Ön İşleme (Image Preprocessing):** Ham piksellerin normalizasyonu ve matris formuna getirilmesi.
-- **Mimarinin Kurulması:** `Sequential` ve tamamen bağlı `Dense` katmanları ile yapay sinir ağı tasarımı.
-- **Ezberlemeyi Önleme:** `Dropout` katmanları ile modelin kararlılığının artırılması.
-- **Optimizasyon:** `Adam` optimizer motoru ile hata oranının (loss) minimize edilmesi.
+1. **Histogram Equalization:** Enhances the contrast of the handwritten digit.
+2. **Gaussian Blur:** Smooths the image and reduces pixel-level noise ($5 \times 5$ kernel).
+3. **Canny Edge Detection:** Isolates the structural outlines and boundaries of the digits.
+4. **Flattening & Normalization:** Converts the 2D processed image into a 1D vector of 784 features and scales pixel values to the $[0, 1]$ range.
 
----
+## Model Architecture
 
-## Kullanılan Teknolojiler ve Araçlar
+The Sequential ANN model consists of the following layers:
 
-- **Dil:** Python 3.12
-- **Geliştirme Ortamı:** `venv` (Virtual Environment) ile izole laboratuvar odası
-- **Kütüphaneler:**
-  - `TensorFlow / Keras` (Derin Öğrenme Motoru)
-  - `OpenCV` (Görüntü İşleme)
-  - `NumPy` (Yüksek Performanslı Matris İşlemleri)
-  - `Matplotlib` (Eğitim Grafikleri ve Görselleştirme)
+- **Dense Input Layer:** 128 neurons with ReLU activation.
+- **Dropout Layer:** 20% regularization to prevent overfitting.
+- **Dense Hidden Layer:** 64 neurons with ReLU activation.
+- **Dense Output Layer:** 10 neurons with Softmax activation (representing digits 0-9).
 
----
+The model is compiled using the `Adam` optimizer and `sparse_categorical_crossentropy` loss function.
 
-## Kurulum ve Çalıştırma
+## Performance & Results
 
-Projeyi yerel bilgisayarınızda çalıştırmak için:
+The model was trained on the **entire MNIST dataset** (60,000 training images, 10,000 test images) for 50 epochs with a batch size of 128.
 
-1. Depoyu klonlayın veya indirin.
-2. Proje dizininde terminali açıp sanal ortamı aktif edin:
-   ```powershell
-   .\venv\Scripts\Activate.ps1
+- **Training Accuracy:** ~97.15%
+- **Test (Validation) Accuracy:** **95.65%**
+- **Test Loss:** 0.1936
+
+## How to Run
+
+1. Install dependencies:
+   ```bash
+   pip install tensorflow numpy opencv-python matplotlib
    ```
