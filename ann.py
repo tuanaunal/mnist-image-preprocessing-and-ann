@@ -73,23 +73,45 @@ def preprocess_image(img):
 - flattering: 28*28 boyutundan 784 boyutuna cevirme
 - normalizasyon: 0-255 arasindan 0-1 arasina cevirme
     """
-img_eq = cv2.equalizeHist(img) # histogram esitleme
-img_blur = cv2.GaussianBlur(img_eq, (5,5), 0) #gaussian blur
-img_edges = cv2.Canny(img_blur, 50, 150) #canny kenar tespiti
-feature = img_edges.flatten()/255.0 # flattering: 28*28 boyutundan 784 boyutuna cevirme
-return features
+    img_eq = cv2.equalizeHist(img) # histogram esitleme
+    img_blur = cv2.GaussianBlur(img_eq, (5,5), 0) #gaussian blur
+    img_edges = cv2.Canny(img_blur, 50, 150) #canny kenar tespiti
+    feature = img_edges.flatten() / 255.0 # flattering: 28*28 boyutundan 784 boyutuna cevirme
+    return feature
 
 num_train =10000
 num_test = 2000
 
-x_train = np.arry([preprocess_image(img) for img in x_train[ :num_train]])
+x_train = np.array([preprocess_image(img) for img in x_train[ :num_train]])
 y_train_sub = y_train[ :num_train]
 
-x_test = np.arry([preprocess_image(img) for img in x_test[ :num_test]])
+x_test = np.array([preprocess_image(img) for img in x_test[ :num_test]])
 y_test_sub = y_test[ :num_test]
 
 # ann model creation
+model = Sequential([
+Dense(128, activation = "relu", input_shape = (784,)), # ilk katman, 128 nöron 28*28 = 784 boyutunda
+Dropout(0.5), # dropout katmani, overfitting'i azaltmak icin, %50 dropout
+Dense(64, activation = "relu"), # ikinci katman, 64 nöron
+Dense(10, activation = "softmax") #cikis katmani, 10 nöron (0-9 rakamlari icin)
+])
+
+# compile model
+model.compile(
+    optimizer = Adam(learning_rate = 0.001), # optimizer
+    loss = "sparse_categorical_crossentropy", # kayip fonksiyonu
+    metrics = ["accuracy"] # metrikler
+)
+
+print(model.summary())
 
 # ann model training
+history = model.fit(
+    x_train, y_train_sub,
+    validation_data = (x_test, y_test_sub),
+    epochs = 10, #epoch sayisi
+    batch_size = 32, # batch boyutu
+    verbose = 2
+)
 
 # evaluate model performance
